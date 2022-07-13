@@ -1,0 +1,1217 @@
+---
+title: "R Notebook"
+output: rmdformats::material
+---
+
+
+```{r setup, include=FALSE}
+
+knitr::opts_chunk$set(echo = TRUE)
+
+library(rmdformats)
+
+```
+
+
+
+
+# INTRODUCCIÓN Y OBJETIVOS: 
+
+La educación es absolutamente clave para que un país prospere o para que las personas puedan explotar sus talentos al máximo, desarrollen habilidades y conocimientos. A partir de los datos del El Grupo Banco Mundial, el cual está conformado por 189 países miembros, sustemamos esta investigación. Asimismo, se desea estudiar la relación entre las variables "El gasto público en educación como porcentaje del PIB comprende el gasto público total"; "Maestros capacitados en educación de nivel primario" y "Tasa de finalización de la educación de nivel primario, total (% del grupo etario correspondiente)"
+Dicho esto, se han planteado dos hipótesis:
+
+- H1:  El gasto público en educación depende de los maestros capacitados en educación a nivel primario
+
+- H2: El gasto público en educación depende de los maestros capacitados en educación a nivel primario y Tasa de finalización de la educación de nivel primario.
+
+
+Posterior a este análisis, se adicionará tres variables: Gasto (% del PIB), la cual es definida por la metadata del Banco Mundical  como los gastos son los pagos de dinero por actividades operativas del Gobierno para la provisión de bienes y servicios; desempleo (% de la población activa total) y el índice de Gini mide hasta qué punto la distribución del ingreso entre individuos u hogares dentro de una economía se aleja de una distribución perfectamente equitativa.
+
+
+```{r}
+
+Link_a_github = "https://github.com/leonardov1199/Trabajo_grupal_5"
+
+```
+
+
+# Descripción de los indicadores que componen la base de datos:
+
+## Variables dependientes e independientes
+
+Variable Dependiente:
+
+- Indicador_1: El gasto público en educación como porcentaje del PIB comprende el gasto público total en educación expresado como porcentaje del Producto Interno Bruto (PIB) en un año determinado. El gasto público en educación incluye el gasto del Gobierno en instituciones educativas (públicas y privadas), administración educativa y subsidios o transferencias para entidades privadas (estudiantes/hogares y otras entidades privadas). 
+
+
+Variable Independiente:
+
+- Indicador_1:Maestros capacitados en educación de nivel primario (% del total de maestros). El porcentaje de docentes titulados en educación primaria corresponde al número de docentes que han recibido la capacitación formal mínima (antes o durante el servicio) exigida para ejercer la docencia en el nivel primario en un país determinado, expresado como porcentaje del número total de docentes en dicho nivel.
+
+- Indicador_2:Tasa de finalización de la educación de nivel primario, total (% del grupo etario correspondiente). Corresponde al número total de estudiantes que ingresan al último año de educación primaria, independientemente de su edad, expresado como porcentaje de la población total en edad oficial de ingresar a dicho grado.
+
+- Indicador_3:Gasto (% del PIB).Los gastos son los pagos de dinero por actividades operativas del Gobierno para la provisión de bienes y servicios. Incluye remuneración de empleados (como sueldos y salarios), interés y subsidios, donaciones, beneficios sociales y otros gastos como renta y dividendos 
+
+- Indicador_4: Desempleo, total (% de la población activa total).El desempleo es la proporción de la población activa que no tiene trabajo pero que busca trabajo y está disponible para realizarlo. Las definiciones de población activa y desempleo difieren según el país 
+
+- Indicador_5: El índice de Gini mide la superficie entre la curva de Lorenz y una línea hipotética de equidad absoluta, expresada como porcentaje de la superficie máxima debajo de la línea. Así, un índice de Gini de 0 representa una equidad perfecta, mientras que un índice de 100 representa una inequidad perfecta.
+
+Toda la información es de la metadata del Banco Mundial.
+
+
+
+# ANÁLISIS DE REGRESIÓN: TABLA
+
+A continuación, se muestra una tabal que representa la regresión, tomando como variable dependiente el gasto público en educación y como variables independientes a la cantidad a los maestros capacitados en educación de nivel primario y la tasa de finalización de la educación de nivel primario. El proceso para llegar a este resultado se muestrá en el Anexo 1: Desarrollo y análisis de la regresión.
+
+
+
+```{r, echo=FALSE,message=FALSE}
+
+library(readxl)
+Avance1 <- read_excel("D:/Estadística 2/Avance1.xlsx")
+View(Avance1)
+
+
+```
+
+
+
+```{r, echo=FALSE,message=FALSE}
+
+##Eliminamos casos perdidos:
+
+library(Rmisc)
+
+Avance1 = Avance1[complete.cases(Avance1$Gasto_Educación),]
+Avance1 = Avance1[complete.cases(Avance1$Maestros_cap_pri),]
+Avance1 = Avance1[complete.cases(Avance1$Tasa_finalizar_pri),]
+
+
+```
+
+
+
+
+
+
+
+```{r, echo=FALSE,message=FALSE}
+
+modelo2 = formula(Avance1$Gasto_Educación ~  Avance1$Maestros_cap_pri + Avance1$Tasa_finalizar_pri, data=Avance1)
+
+reg2=lm(modelo2,data=Avance1)
+
+summary(reg2)
+
+
+
+```
+
+
+```{r, echo=FALSE,message=FALSE}
+
+
+library(stargazer)
+stargazer(reg2,type = "text",intercept.bottom = FALSE)
+
+
+```
+
+
+En primer lugar, De acuerdo con los resultados del stargazer en la comparación de los modelos, nos quedamos con el segundo modelo. Asimismo, en el análisis de la varianza, nos indica que la variable tasa de finalización en primaria aporta, lo cual demuestra que debería quedarse en la regresión lineal múltiple.
+Por otra parte, en las pruebas de diagnosticos tenemos diversos resultados como: en la linealidad, presenta que el supuesto está cumpliendo; en la homocedasticidad, en la prueba de Breusch-Pagan muestra un resultado mayor que 0.05; es decir, el diagnostico es válido. Por otro lado, el diagnostico de Normalidad de los residuos demuestra que es menor a 0.05; por lo tanto, no hay normalidad. Cabe recalcar que en la prueba de valores influyentes a pesar de observar en el gráfico casos que son atípicos, pues en la prueba de influencias muestra un resultado de 0; en otras palabras, no se tiene que eliminar ningun país.
+
+
+
+# ANÁLISIS DE CLUSTERS
+
+## Gráfico de clusters
+
+Para el análisis de clusters, se tomó en cuenta las tres variables anteriormente trabajadas (El gasto público en educación, Maestros capacitados en educación de nivel primario, Tasa de finalización de la educación de nivel primario) y se adicionaron tres variables: Gasto (% del PIB), Desempleo y El índice de Gini. 
+
+
+
+Tal como se puede observar, en el Anexo 2, en el análisis de Clusters, se evaluó el número de clusters y se optó por trabajar con dos grupos. Adición a ello, se evaluó el método para poder conglomerar a los casos (Ver Anexo: Análisis de Clusters); y debido a que el average y sin casos mal clusterizados fue mayor en comparación a los otros métodos (agnes y pam). Asimismo, se optó por usar el método Diana para el proceso de conglomerados (Ver Anexo: Análisis de Clusters). Los casos clusterizados mediante el método Diana se muestran a continuación en el gráfico de Escalamiento Multimensional:
+
+```{r, echo=FALSE,message=FALSE,warning=FALSE}
+
+library(rio)
+allData1=import("https://github.com/leonardov1199/Trabajo_grupal_5/blob/main/TRABAJO%201.xlsx?raw=true")
+
+
+```
+
+```{r, echo=FALSE,message=FALSE}
+
+allData1 = allData1[,c(4,1,2,3,5,8,9),]
+
+
+```
+
+
+
+
+```{r, echo=FALSE,message=FALSE}
+library(BBmisc)
+allData1[,-1]=BBmisc::normalize(allData1[,-1],method='standardize')
+allData1=allData1[complete.cases(allData1),]
+
+```
+
+
+
+
+
+
+```{r, echo=FALSE,message=FALSE}
+
+dataClus=allData1[,-1]
+row.names(dataClus)=allData1$PAISES
+
+```
+
+
+
+
+
+```{r, echo=FALSE,message=FALSE}
+
+library(cluster)
+g.dist = daisy(dataClus, metric="gower")
+library(factoextra )
+
+
+```
+
+
+```{r, echo=FALSE,message=FALSE}
+
+set.seed(123)
+grupos=2
+
+```
+
+
+
+```{r, echo=FALSE,message=FALSE}
+
+res.diana <- hcut(g.dist, k = grupos,hc_func='diana')
+dataClus$diana=res.diana$cluster
+
+```
+
+```{r, echo=FALSE,message=FALSE}
+
+library(magrittr)
+silDIANA=data.frame(res.diana$silinfo$widths)
+silDIANA$PAIS=row.names(silDIANA)
+poorDIANA=silDIANA[silDIANA$sil_width<0,'PAISES']%>%sort()
+
+```
+
+
+```{r, echo=FALSE,message=FALSE,length=8, width=12}
+
+proyeccion = cmdscale(g.dist, k=2,add = T) # k es la cantidad de dimensiones
+dataClus$dim1 <- proyeccion$points[,1]
+dataClus$dim2 <- proyeccion$points[,2]
+base= ggplot(dataClus,aes(x=dim1, y=dim2,label=row.names(dataClus))) 
+base + geom_text(size=2, aes(color=as.factor(diana)))  + labs(title = "DIANA") 
+```
+
+
+
+
+# ANÁLISIS FACTORIAL
+
+
+```{r, echo=FALSE,message=FALSE}
+
+library(rio)
+data2=import("https://github.com/leonardov1199/Trabajo_grupal_5/blob/main/TRABAJO%202.xlsx?raw=true")
+
+
+```
+
+
+```{r, echo=FALSE,message=FALSE}
+
+data2 = data2[,c(4,1,2,3,5,6,8),]
+
+```
+
+
+
+```{r, echo=FALSE,message=FALSE}
+## En demo:
+# a numerica
+data2[,-1]=lapply(data2[,-1],as.numeric)
+
+```
+
+
+```{r, echo=FALSE,message=FALSE}
+
+# sin perdidos:
+data2=na.omit(data2)
+
+
+```
+
+
+
+```{r, echo=FALSE,message=FALSE}
+dontselect=c("PAISES")
+select=setdiff(names(data2),dontselect) 
+theData=data2[,select] # sin los Scores ni nombre de país.
+
+
+```
+
+
+```{r, echo=FALSE,message=FALSE,warning=FALSE}
+
+library(polycor)
+corMatrix=polycor::hetcor(theData)$correlations
+library(psych)
+
+```
+
+
+```{r, echo=FALSE,message=FALSE}
+
+library(GPArotation)
+resfa <- fa(theData,
+            nfactors = 2,
+            cor = 'mixed',
+            rotate = "varimax",
+            fm="minres")
+
+```
+
+
+
+```{r, echo=FALSE,message=FALSE}
+
+fa.diagram(resfa)
+
+```
+
+
+Por último, se procedió a realizar un análisis factorial exploratorio respecto al nivel de correlación de estás seis variables; para posteriormente, evaluar la existencia de variables latentes. El procedimiento se expone en el “Anexo3: Análisis Factorial” y los resultados se muestran a continuación.
+
+
+
+Según el análisis exploratorio de factorización tanto para la prueba Matriz Identidad como también la prueba matriz singular muestran un resultado falso, lo cual quiere decir que sí hay agrupamientos, donde dos variables pueden resumir las seis variables. Sin embargo, en el análisis factorial confirmatorio consideramos la variable latente MR2 porque aborda más variables con cagas significativas; aunque el aporte menor es el Índice de Gini, mientras que en la MR1 solo está considerando una variable, la cual es el desempleo.
+
+
+
+Volviendo a lo anterior, construimos un indicador para demostrar la eficiencia educativa, la cual consideramos las 4 variables de la variable latente MR2. No obstante, tenemos en las tres pruebas diferentes con respecto al indicador. En primer lugar, la prueba de ChiSquare demuestra un valor de 0.7714283, lo cual es mayor a 0.05; por lo tanto, no acepta el modelo. En segundo lugar, la prueba del índice Tucker Lewi muestra un valor de 1.222933, el cual es mayor que 0.09; entonces, esta prueba sí lo acepta. En tercer lugar, la prueba de la Raíz del error cuadrático medio demuestra que el mrsea es menor con un valor de 0; por ende, la prueba acepta el análisis confirmatorio que se puede formar en aquel modelo.
+
+
+
+
+
+
+
+
+
+
+
+
+# CONCLUSIONES:
+
+1.Se acepta la hipótesis 2; es decir, el gasto público en educación depende de los maestros capacitados en educación a nivel primario y Tasa de finalización de la educación de nivel primario.
+
+2.Los casos fueron divididos en base a tres grupos según el metodo divisivo, el cuál fue el más adeucado por el average y no tener casos mal clusterizados. Mientras que para Agenes y Pam tenian casos mal clusterizados (Ver Anexo 2: Análisis de Clusters)
+
+3.Según el análisis factoral exploratorio nos indicó 2 variables latentes; sin embargo, para nuestro indicador optamos por el modelo MR2, el cual agrupaba a las siguientes variables para demostrar la educación eficiente: e gasto público en educación, maestros capacitados en educación de nivel primario, tasa de finalización de la educación de nivel primario y el índice de Gini mide la superficie entre la curva de Lorenz y una línea hipotética de equidad absoluta.
+
+4.Esta investigación tuvo la limitación de que algunos casos no tenían datos actualizados en el Banco Mundial respecto a la educación en líneas generales y en otros casos varios paises con casos perdidos. Por tanto, para próximos estudios y con el objetivo de tener resultados más robustos, se sugiere tomar en cuenta la actualización de la base de datos con el objetivo de investigar con la mayor cantidad de casos posibles.
+
+
+
+
+
+
+
+
+
+
+
+# ANEXO 1: Desarrollo de Regresión y Diagnosticos
+
+## LIMPIEZA:
+
+
+
+```{r, echo=FALSE,message=FALSE}
+
+library(readxl)
+Avance1 <- read_excel("D:/Estadística 2/Avance1.xlsx")
+View(Avance1)
+
+
+```
+
+
+
+
+```{r, echo=FALSE,message=FALSE}
+
+str(Avance1)
+
+```
+
+```{r, echo=FALSE,message=FALSE}
+
+summary(Avance1$Gasto_Educación)
+
+```
+
+
+```{r, echo=FALSE,message=FALSE}
+
+summary(Avance1$Maestros_cap_pri)
+
+```
+
+
+```{r, echo=FALSE,message=FALSE}
+
+summary(Avance1$Tasa_finalizar_pri)
+```
+
+```{r}
+
+##Eliminamos casos perdidos:
+
+library(Rmisc)
+
+Avance1 = Avance1[complete.cases(Avance1$Gasto_Educación),]
+Avance1 = Avance1[complete.cases(Avance1$Maestros_cap_pri),]
+Avance1 = Avance1[complete.cases(Avance1$Tasa_finalizar_pri),]
+
+
+```
+
+
+
+
+## PRUEBA DE HIPÓTESIS: 
+
+ 1. Hipótesis 1: Los maestros capacitados en educación a nivel primario es dependiente del gasto educación en PIB
+
+
+
+
+
+```{r}
+
+modelo1 = formula(Avance1$Gasto_Educación ~ Avance1$Maestros_cap_pri)
+
+reg1=lm(modelo1,data=Avance1)
+
+summary(reg1)
+
+```
+
+
+```{r}
+
+library(stargazer)
+stargazer(reg1,type = "text",intercept.bottom = FALSE)
+
+```
+
+
+
+Interpretación: En primer lugar, al tener un p-value enor a 0.05 (0.01842), es posible afirmar que el gasto en educación público de educación total por PIB tiene un efecto significativo en la capacitación de los maestros a nivel primario. En segundo lugar, debido a que el coeficiente es positivo (3.425747), podemos afirmar que se trata de una relación directa. En tercer lugar, debido a Multiple R -squared para saber el poder explicativo podemos interpretar que los maestros capacitados en educación de nivel primario dependen del gasto público en educaciÃ³n en un 3.672%, lo cual es muy poca inversiÃ³n por parte de la distribución del PIB.  Asimismo, por cada maestro que sea capacitado, va aumentar el gasto pÃºblico en educaciÃ³n total en un 0.013.
+
+Dicho esto, se presenta la siguiente ecuaciÃ³n: y = 3,426 + 0,013(X)
+
+
+
+```{r}
+
+##Plano de primer dimensional
+
+library(ggplot2)
+
+ggplot(Avance1, aes(x=Maestros_cap_pri, y=Gasto_Educación)) + 
+  geom_point()+
+  geom_smooth(method=lm)
+
+
+
+```
+
+
+
+###2. Hipótesis 2: Los maestros capactiados y la tasa de finalizaciÃ³n de la educación de nivel primario son dependientes o afectan al gasto educaciÃ³n total en PIB
+
+
+
+```{r}
+
+modelo2 = formula(Avance1$Gasto_Educación ~  Avance1$Maestros_cap_pri + Avance1$Tasa_finalizar_pri, data=Avance1)
+
+reg2=lm(modelo2,data=Avance1)
+
+summary(reg2)
+
+
+
+```
+
+```{r}
+
+##Plano de tercera dimensión
+
+library(scatterplot3d)
+G  <- scatterplot3d(Avance1[,c('Tasa_finalizar_pri','Maestros_cap_pri','Gasto_Educación')])
+G$plane3d(reg2, draw_polygon = TRUE, draw_lines = FALSE)
+
+```
+
+```{r}
+
+library(stargazer)
+stargazer(reg2,type = "text",intercept.bottom = FALSE)
+
+
+```
+
+
+#InterpretaciÃ³n: En primer lugar, al tener un p-value enor a 0.05 (0.03401), es posible afirmar que el gasto en educaciÃ³n pÃºblico de educaciÃ³n total por PIB tiene un efecto significativo en la capacitaciÃ³n de los maestros a nivel primario y la tasa de finalización de la educaciÃ³n de nivel primario. En segundo lugar, debido a que el coeficiente es positivo (2.757), podemos afirmar que se trata de una relaciÃ³n directa. En tercer lugar, debido a Multiple R -squared para saber el poder explicativo podemos interpretar que los maestros capacitados en educación de nivel primario y la tasa de finalizaciÃ³n de la educaciÃ³n de nivel primario dependen del gasto pÃºblico en educaciÃ³n en un 4.466%.  Asimismo, por cada maestro que sea capacitado, va aumentar el gasto público en educación total en un 0.04466.
+
+#Dicho esto, se presenta la siguiente ecuaciÃ³n: Y = 2,757088 + 0,010977(X1) + 0,009085(X2))
+
+
+
+
+```{r, echo=FALSE,message=FALSE}
+
+library(stargazer)
+
+stargazer(reg1,reg2, type ="text")
+
+```
+
+
+## ANALISIS DE VARIANZA
+
+A continuaciÃ³n, se analiza si hay un cambio significativo entre el paso del modelo 1 al 2. 
+
+H0: Ambos modelos no difieren. 
+H1: Ambos modelos si difieren.
+
+```{r, echo=FALSE,message=FALSE}
+
+tanova=anova(reg1,reg2)
+
+stargazer(tanova,type = 'text',summary = F,title = "Table de AnÃ¡lisis de Varianza")
+
+
+```
+
+###Ho: Cambio No significativo. Quedarse con este es que la variable que viene no aporta. 
+###H1: Cambio Sí significativo. Si es menor que 0.05; esto quiere decir que la variable que se agrega debería quedarse. 
+
+
+#Debido a que al P-value es menor a 0.05 (0), se rechaza la hipótesis nula y es posible afirmar que ambos modelos si difieren (si se ha reducido el error al pasar de un modelo a otro). Dicho esto,  el modelo 2 si reduce el error al incluir una variable más.
+
+
+```{r}
+
+##DIAGNOSTICO DE REGRESION:
+
+#1. Linealidad:
+
+plot(reg2, 1) #línea roja debe tender a la horizonal
+
+```
+
+#Lo principal es que la línea roja esta medianamente horizontal, lo cual demuestra que la linealidad es correcta. El supuesto de linealidad se estÃ¡ cumpliendo.
+
+
+```{r}
+#2. Homocedasticidad
+
+plot(reg2, 3) # linea roja debe tender a horizontal
+
+```
+
+#El modelo si es bueno el Y deberia ser similar al Y residual. El error debe ser muy cercano a 0.
+
+
+
+```{r}
+#VerificaciÃ³n
+
+library(lmtest)
+bptest(reg2)
+
+```
+
+#Ho: Homogeneidad 
+#H1: No hay homogeneidad
+
+#Usando el lmtest se demuestra que hay homogeneidad. Entonces este diagnostico vÃ¡lido porque es mayor a 0.05 y por lo tanto sí hay homocedasticidad. 
+
+
+```{r}
+
+#3. Normalidad de los residuos
+plot(reg2, 2)
+
+```
+
+#Los puntos estan mÃ¡s o menos alineados. Del mismo modo, tampoco hay colas de dispersión, los casos aÃºn siguen alineados a la diagonal. 
+
+
+```{r}
+#Verificación
+
+
+shapiro.test(reg2$residuals)
+
+```
+
+#Ho: Hay normalidad
+#H1: No hay normalidad
+
+
+```{r}
+
+#4. NO MULTICOLINEALIDAD 
+
+library(DescTools)
+VIF(reg2)
+
+
+```
+
+
+
+#Entonces concluimos una contradicciÃ³n, pero tenemos diferentes herramientas. Tenemos entonces homogeneidad y no hay normalidad de residuos. Luego usamos la no multicolinealidad, pero no debemos eliminar ningÃºn valor. 
+
+
+
+
+
+
+```{r}
+
+#5. Valores influyentes:
+
+plot(reg2, 5)
+
+
+```
+
+
+```{r}
+
+checkReg2=as.data.frame(influence.measures(reg2)$is.inf)
+head(checkReg2)
+
+
+```
+
+
+
+```{r}
+
+checkReg2[checkReg2$cook.d & checkReg2$hat,]
+
+```
+
+
+#Ambas tienen que ser verdaderas, pero no hay. A nivel de filas. Asimismo, no se tiene que eliminar ningÃºn caso. Todos estÃ¡n bien. No hay que borrar nada. 
+
+
+
+
+
+# ANEXO 2: ANÁLISIS DE CLUSTERS
+## LIMPIEZA:
+
+
+```{r, echo=FALSE,message=FALSE}
+
+library(readxl)
+TRABAJO_1 <- read_excel("C:/Users/a2019/Desktop/TRABAJO 1.xlsx")
+View(TRABAJO_1)
+
+```
+
+```{r, echo=FALSE,message=FALSE}
+
+TRABAJO_1 = TRABAJO_1[,c(4,1,2,3,5,8,9),]
+
+
+```
+
+
+```{r}
+
+str(TRABAJO_1)
+
+```
+
+#Ya estan en númericas
+
+
+```{r}
+
+library(BBmisc)
+TRABAJO_1[,-1]=BBmisc::normalize(TRABAJO_1[,-1],method='standardize')
+TRABAJO_1=TRABAJO_1[complete.cases(TRABAJO_1),]
+
+```
+
+
+
+###1. Proceso de normalización de las variables 
+
+
+```{r}
+
+##Se presentan los estadísticos descríptivos para cada variable
+
+cor(TRABAJO_1[,-1])
+
+```
+
+```{r}
+
+TRABAJO_1$Indice_Gini=-1*TRABAJO_1$Indice_Gini
+TRABAJO_1$`Public Services`=-1*TRABAJO_1$`Public Services`
+
+```
+
+```{r}
+
+BASE=TRABAJO_1[,-1]
+row.names(BASE)=TRABAJO_1$PAISES
+```
+```{r}
+
+library(cluster)
+g.dist = daisy(BASE, metric="gower")
+
+```
+
+```{r}
+#COPIAS:
+
+DATA_2 = BASE
+DATA_3 = BASE
+DATA_4 = BASE
+
+```
+
+
+
+##2. Proponer cantidad de clusters:
+
+
+```{r}
+
+## Para PAM / PARTICIÓN
+
+library(factoextra)
+fviz_nbclust(BASE, pam,diss=g.dist,method = "gap_stat",k.max = 10,verbose = F)
+
+```
+
+```{r}
+
+## PARA Agnes
+
+fviz_nbclust(BASE, hcut,diss=g.dist,method = "gap_stat",k.max = 10,verbose = F,hc_func = "agnes")
+
+```
+
+
+
+
+```{r}
+
+## PARA DIANA
+
+fviz_nbclust(BASE, hcut,diss=g.dist,method = "gap_stat",k.max = 10,verbose = F,hc_func = "diana")
+
+
+
+```
+
+
+##3. Evaluemos resultados
+###Pidamos dos grupos porque la cantidad de clusters nos muestra entre 1 o 2:
+
+```{r}
+
+###pam
+
+set.seed(123)
+grupos=2
+res.pam=pam(g.dist,k = grupos,cluster.only = F)
+DATA_2$pam=res.pam$cluster
+
+```
+
+```{r}
+
+###agnes
+
+res.agnes<- hcut(g.dist, k =grupos,hc_func='agnes',hc_method = "ward.D")
+DATA_3$agnes=res.agnes$cluster
+
+```
+
+
+```{r}
+
+###diana
+
+res.diana <- hcut(g.dist, k = grupos,hc_func='diana')
+DATA_4$diana=res.diana$cluster
+
+```
+
+##Ahora veamos a cuál le fue mejor:
+
+##a) Para PAN
+```{r}
+
+fviz_silhouette(res.pam)
+
+
+```
+
+##b) Para AGNES
+
+```{r}
+fviz_silhouette(res.agnes)
+```
+
+##c) Para DIANA
+
+```{r}
+fviz_silhouette(res.diana)
+
+```
+
+#Interpretación: Para comprar las diversas estrategias nos centramos en el average, donde la prueba DIANA es superior por tener un 0.3 en comparación a las otras pruebas. Asimismo, en la prueba no tiene casos mal clusterizados como lo tienen las otras pruebas; por lo tanto, se puede concluir que estos datos fueron mejor clusterizados usando el método jerarquico divisivo.
+
+
+
+
+```{r}
+
+##Encontremos los casos MAL clusterizados (silueta negativa):
+
+library(magrittr)
+
+silPAM=data.frame(res.pam$silinfo$widths)
+silPAM$country=row.names(silPAM)
+poorPAM=silPAM[silPAM$sil_width<0,'country']%>%sort()
+
+```
+
+```{r}
+silAGNES=data.frame(res.agnes$silinfo$widths)
+silAGNES$country=row.names(silAGNES)
+poorAGNES=silAGNES[silAGNES$sil_width<0,'country']%>%sort()
+
+```
+
+```{r}
+
+silDIANA=data.frame(res.diana$silinfo$widths)
+silDIANA$country=row.names(silDIANA)
+poorDIANA=silDIANA[silDIANA$sil_width<0,'country']%>%sort()
+
+```
+
+
+
+```{r}
+library("qpcR") 
+mal_Clus=as.data.frame(qpcR:::cbind.na(poorPAM, poorAGNES,poorDIANA))
+mal_Clus
+
+
+```
+
+```{r}
+
+intersect(poorPAM,poorAGNES)
+
+```
+```{r}
+# en PAM pero NO en Agnes
+setdiff(poorPAM,poorAGNES)
+
+```
+
+```{r}
+
+setdiff(poorAGNES,poorPAM)
+
+```
+
+```{r, echo=FALSE,message=FALSE}
+
+DATA_A = merge(DATA_4,BASE)
+```
+
+
+```{r, echo=FALSE,message=FALSE}
+
+DATA_B = merge(DATA_A,TRABAJO_1)
+
+```
+
+
+```{r, echo=FALSE,message=FALSE}
+
+DATA_B = DATA_B[,c(8,1,2,3,4,5,6,7),]
+
+
+```
+
+
+```{r, echo=FALSE,message=FALSE}
+
+dataClus=DATA_B [,-1]
+row.names(dataClus)=DATA_B$PAISES
+
+```
+
+
+#4. Graficando
+
+##Por lo anterior sabemos que usaremos la técnica diana. Verifiquemos las etiquetas:
+
+```{r}
+
+proyeccion = cmdscale(g.dist, k=2,add = T) # k es la cantidad de dimensiones
+dataClus$dim1 <- proyeccion$points[,1]
+dataClus$dim2 <- proyeccion$points[,2]
+base= ggplot(dataClus,aes(x=dim1, y=dim2,label=row.names(dataClus))) 
+base + geom_text(size=2, aes(color=as.factor(diana)))  + labs(title = "DIANA") 
+
+
+```
+
+
+# ANEXO 3: ANÁLISIS FACTORIAL
+## LIMPIEZA:
+
+
+
+```{r}
+
+library(rio)
+
+TRABAJO_2=import("https://github.com/leonardov1199/Trabajo_grupal_5/blob/main/TRABAJO%202.xlsx?raw=true")
+
+
+```
+
+
+
+
+
+```{r}
+
+
+names(TRABAJO_2)
+str(TRABAJO_2)
+
+```
+
+```{r}
+
+TRABAJO_2 = TRABAJO_2[,c(4,1,2,3,5,6,8),]
+
+```
+
+
+
+```{r}
+## En demo:
+# a numerica
+TRABAJO_2[,-1]=lapply(TRABAJO_2[,-1],as.numeric)
+
+```
+
+
+```{r}
+# sin perdidos:
+TRABAJO_2=na.omit(TRABAJO_2)
+```
+
+
+##Proceso del Analisis Factorial Exploratorio (EFA)
+
+
+```{r}
+
+#Calculemos matriz de correlación:
+
+
+dontselect=c("PAISES")
+select=setdiff(names(TRABAJO_2),dontselect) 
+theData=TRABAJO_2[,select] # sin los Scores ni nombre de país.
+
+```
+
+
+```{r}
+
+data.frame(theData)
+
+```
+
+
+
+
+
+##1. Calculemos matriz de correlación:
+
+
+```{r}
+
+library(polycor)
+
+corMatrix=polycor::hetcor(theData)$correlations
+
+```
+
+##2. Explorar correlaciones:
+- Sin evaluar significancia:
+
+```{r}
+library(ggcorrplot)
+
+ggcorrplot(corMatrix)
+
+```
+
+#Se puede observar que no hay una correlación fuerte, pero se muestra mucha relación inversa, lo cual se comprobara con las pruebas Kaiser-Meyer-Olkin, la matriz identidad y la matriz singular, pero lo más probable es que no haya una variable latente que resuma a todas las variables
+
+
+
+
+##3. Verificar si datos permiten factorizar:
+
+```{r}
+
+##Prueba Kaiser-Meyer-Olkin
+
+library(psych)
+psych::KMO(corMatrix) 
+
+```
+
+
+##4. Verificar si la matriz de correlaciones es adecuada
+
+#Lo que interesa es sea mayor que 0.07 para poder tener la capacidad de agruparse en otros factores. Sin embargo, en el Overall MSA muestra un valor de 0.61, lo cual es menor; por lo tanto, no se va formar un factor.
+
+
+```{r}
+
+##Prueba Matriz Identidad
+#Hnula: La matriz de correlacion es una matriz identidad
+
+cortest.bartlett(corMatrix,n=nrow(theData))$p.value>0.05
+
+
+```
+
+#En esta prueba no hay una prueba de identidad porque queremos que la matriz de correlación sea diferente a la matriz identidad; por lo tanto, es la adecuada ya que de esa manera se puede hacer un agrupamiento de variables.
+
+
+
+```{r}
+
+##Prueba Matriz Singular
+#Hnula: La matriz de correlacion es una matriz singular.
+
+
+library(matrixcalc)
+
+is.singular.matrix(corMatrix)
+
+```
+
+
+#En esta prueba no hay una prueba de matriz singular,porque tenemos un determinante es 0. Por lo tanto, tiene que tener 0 en las correlaciones; entonces deducimos que sí puede haber más de un factor de agrupamiento.
+
+
+
+
+##5. Determinar en cuantos factores o variables latentes podríamos redimensionar la data:
+```{r}
+
+fa.parallel(theData,fm ='ML', fa = 'fa',correct = T)
+
+```
+
+##6. Redimensionar a numero menor de factores
+```{r}
+
+library(GPArotation)
+resfa <- fa(theData,
+            nfactors = 2,
+            cor = 'mixed',
+            rotate = "varimax",
+            fm="minres")
+print(resfa$loadings)
+
+```
+
+#Observamos que las cargas más altas se presentan en el segundo factor; mientras que en el primer factor solo aporta el indice de gini y el desempleo.
+
+
+
+```{r}
+
+print(resfa$loadings,cutoff = 0.5)
+
+```
+
+
+
+
+
+```{r}
+#Resultado visual:
+
+fa.diagram(resfa)
+
+```
+
+#Evaluando Resultado obtenido:
+
+```{r}
+
+#¿Qué variables aportaron mas a los factores?
+
+sort(resfa$communality)
+
+```
+#Las variables que más aportan es el desempleo, el cual está dirigido al segundo factorial.
+
+
+```{r}
+
+#¿Qué variables contribuyen a mas de un factor?
+
+sort(resfa$complexity)
+
+```
+
+
+
+
+
+
+
+#ANALISIS FACTORIAL CONFIRMATORIO
+
+
+
+
+```{r}
+names(TRABAJO_2)
+
+```
+
+
+
+
+
+```{r}
+#Si la exploración apoyaba nuestro marco teórico, podemos proponer cómo construir los indices:
+
+model <- ' Eficiente_Educación  =~ Gasto_Edu_Total + Gasto_Edu_Pri + Gasto_Edu_Sec + Indice_Gini' 
+
+
+```
+
+
+```{r}
+
+## normalizar las variables:
+theDataNorm=as.data.frame(scale(theData))
+
+```
+
+
+```{r}
+
+library(lavaan)
+
+cfa_fit <- cfa(model, data=theDataNorm, 
+           std.lv=TRUE,  
+           missing="fiml")
+```
+
+##Preparo los tests:
+
+
+
+```{r}
+
+allParamCFA=parameterEstimates(cfa_fit,standardized = T)
+allFitCFA=as.list(fitMeasures(cfa_fit))
+
+```
+
+
+```{r}
+
+allParamCFA[allParamCFA$op=="=~",]
+
+```
+ 
+ 
+ 
+```{r}
+
+#Prueba del ChiSquare
+
+allFitCFA[c("chisq", "df", "pvalue")] # pvalue>0.05
+
+```
+#Necesitamos que el p_value debe ser mayor a 0.05 para que sea bueno; sin embargo, en la prueba del Chisquare sale mayor a con un valor de 0.7714283
+
+
+```{r}
+
+#Prueba del Índice Tucker Lewi 
+
+allFitCFA$tli # > 0.90
+```
+#Aprobamos esta prueba porque tiene un valor menor que 0.90
+
+```{r}
+
+#Prueba de la Raíz del error cuadrático medio 
+
+allFitCFA[c('rmsea.ci.lower','rmsea' ,'rmsea.ci.upper')] # 0.05 en el Int de Conf?
+
+```
+#En la prueba de la Raiz del error cuadrático medio, queremos que sea menor a 0.05, lo cual muestra en el rmsea que es 0; por lo tanto, la prueba acepta que se puede formar un factor en aquel modelo.
+
+
+
+
+
